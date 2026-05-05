@@ -1,5 +1,10 @@
 import streamlit as st  # type: ignore
 import csv
+
+global task_list
+if "task_list" not in st.session_state:
+    st.session_state.task_list = []
+
 def l_interface():
     task = st.text_input("Task 📝", help = "The name of the task.")
     time = st.number_input("Estimated Time 🕞", min_value = 0, max_value = 1440, icon = "⌚", help = "The estimated time a task takes, in minutes.")
@@ -19,6 +24,8 @@ def button(name, time, difficulty, due_date):
             if file.tell == 0:
                 writer.writeheader()
             writer.writerow({"name": name, "time": time, "difficulty": difficulty, "due_date": due_date})
+        st.toast("Your event has been added", duration = 1, icon = "👈")
+    
 
 
 def main():
@@ -32,9 +39,17 @@ def main():
     button(na,ti,di,da)
     st.space("small")
     with st.container(border = True):
-        with open("memory.csv", "a"):
-            ...
+        with open("memory.csv", "r") as file:
+            fieldnames = ["name","time", "difficulty", "due_date"]
+            reader = csv.DictReader(file, fieldnames = fieldnames)
+            for row in reader:
+                col1, col2, col3, col4 = st.columns([1.5, 1, 1, 1])
+                col1.markdown(f"📋 **Task:** :blue-badge[{row['name']}]")
+                col2.markdown(f"⏳ **Time:** :orange-badge[{row['time']}]")
+                col3.markdown(f"🏔️ **Difficulty:** :red-badge[{row['difficulty']}]")
+                col4.markdown(f"📅 **Due:** :primary-badge[{row['due_date']}]")
+                
 
-
+                
 if __name__ == "__main__":
     main()
