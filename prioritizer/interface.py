@@ -16,7 +16,7 @@ def r_interface():
     return difficulty, due_date
 
 def button(name, time, difficulty, due_date):
-    add_event = st.button("Add Event", width = "stretch")
+    add_event = st.button("Add Event", width = "stretch", key = "add")
     if add_event and not name == "":
         with open("memory.csv", "a", newline = "") as file:
             fieldnames = ["name", "time", "difficulty", "due_date"]
@@ -26,7 +26,10 @@ def button(name, time, difficulty, due_date):
             writer.writerow({"name": name, "time": time, "difficulty": difficulty, "due_date": due_date})
         st.toast("Your event has been added", duration = 1, icon = "👈")
     
-
+def calculate_function():
+    st.button("Calculate Priority", width = "stretch", type = "primary", key = "calculate")
+    with st.container(border = True):
+        ...
 
 def main():
     st.title("Smart Prioritizer 🧠")
@@ -43,12 +46,13 @@ def main():
             fieldnames = ["name","time", "difficulty", "due_date"]
             reader = csv.DictReader(file, fieldnames = fieldnames)
             for row in reader:
-                col1, col2, col3, col4 = st.columns([1.5, 1, 1, 1])
+                col1, col2, col3, col4 = st.columns([1.5, 1.5, 1.5, 1.5])
                 col1.markdown(f"📋 **Task:** :blue-badge[{row['name']}]")
-                col2.markdown(f"⏳ **Time:** :orange-badge[{row['time']}]")
+                col2.markdown(f"⏳ **Time:** :orange-badge[{row['time']} minutes]")
                 col3.markdown(f"🏔️ **Difficulty:** :red-badge[{row['difficulty']}]")
                 col4.markdown(f"📅 **Due:** :primary-badge[{row['due_date']}]")
-                
+    st.space("small")
+    calculate_function()
 
                 
 if __name__ == "__main__":
