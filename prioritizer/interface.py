@@ -1,9 +1,19 @@
 import streamlit as st  # type: ignore
 import csv
+import time
+from datetime import date
+from datetime import datetime
 
 global task_list
 if "task_list" not in st.session_state:
     st.session_state.task_list = []
+
+global priority_list
+if "priority_list" not in st.session_state:
+    st.session_state.priority_list = []
+
+if "show_border" not in st.session_state:
+    st.session_state.show_border = False
 
 def l_interface():
     task = st.text_input("Task 📝", help = "The name of the task.")
@@ -27,9 +37,47 @@ def button(name, time, difficulty, due_date):
         st.toast("Your event has been added", duration = 1, icon = "👈")
     
 def calculate_function():
-    st.button("Calculate Priority", width = "stretch", type = "primary", key = "calculate")
-    with st.container(border = True):
-        ...
+    calc = st.button("Calculate Priority", width = "stretch", type = "primary", key = "calculate")
+    with st.container(border = st.session_state.show_border, key = "container"):
+        if calc:
+            st.session_state.show_border = True 
+            with st.spinner("Calculating Numbers...", width = "stretch"):
+                time.sleep(5)
+            with open("memory.csv", "r") as file:
+                fieldnames = ["name", "time", "difficulty", "due_date"]
+                reader = csv.DictReader(file, fieldnames = fieldnames)
+                st.session_state.priority_list = []
+                for row in reader:
+                    today = date.today()
+                    d1 = datetime.strptime(row["due_date"], "%Y-%m-%d")
+                    diff = d1.date() - today
+                    priority_num = int(row["difficulty"]) + int(row["time"]) - int(diff.days)
+                    st.session_state.priority_list.append(priority_num)
+                top1 = algorithm()
+                top2 = algorithm()
+                top3 = algorithm()
+            with open("memory.csv", "r") as file:
+                fieldnames = ["name", "time", "difficulty", "due_date"]
+                reader = csv.DictReader(file, fieldnames = fieldnames)
+                data = list(reader)
+                first_priority = data[top1]["name"]
+                second_priority = data[top2]["name"]
+                third_priority = data[top3]["name"]
+            st.header("**Top Priorities for Today** 🏆")
+            st.space("xxsmall")
+            st.write(f"1. {first_priority}")
+            st.write(f"2. {second_priority}")
+            st.write(f"3. {third_priority}")
+
+def algorithm():
+    top1 = 0
+    max = st.session_state.priority_list[0]
+    for i in range(len(st.session_state.priority_list)):
+        if st.session_state.priority_list[i] > max:
+            max = st.session_state.priority_list[i]
+            top1 = i    
+    st.session_state.priority_list[top1] = float("-inf")
+    return top1
 
 def main():
     st.title("Smart Prioritizer 🧠")
