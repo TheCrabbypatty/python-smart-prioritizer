@@ -12,9 +12,6 @@ global priority_list
 if "priority_list" not in st.session_state:
     st.session_state.priority_list = []
 
-if "show_border" not in st.session_state:
-    st.session_state.show_border = False
-
 def l_interface():
     task = st.text_input("Task 📝", help = "The name of the task.")
     time = st.number_input("Estimated Time 🕞", min_value = 0, max_value = 1440, icon = "⌚", help = "The estimated time a task takes, in minutes.")
@@ -38,9 +35,8 @@ def button(name, time, difficulty, due_date):
     
 def calculate_function():
     calc = st.button("Calculate Priority", width = "stretch", type = "primary", key = "calculate")
-    with st.container(border = st.session_state.show_border, key = "container"):
+    with st.container(border = True, key = "container"):
         if calc:
-            st.session_state.show_border = True 
             with st.spinner("Calculating Numbers...", width = "stretch"):
                 time.sleep(5)
             with open("memory.csv", "r") as file:
@@ -65,9 +61,18 @@ def calculate_function():
                 third_priority = data[top3]["name"]
             st.header("**Top Priorities for Today** 🏆")
             st.space("xxsmall")
-            st.write(f"1. {first_priority}")
-            st.write(f"2. {second_priority}")
-            st.write(f"3. {third_priority}")
+            header_cols = st.columns([3, 2, 2, 3])
+            with header_cols[0]:
+                st.markdown("**📋 Task**")
+            with header_cols[1]:
+                st.markdown("**⏳ Time**")
+            with header_cols[2]:
+                st.markdown("**🏔️ Difficulty**")
+            with header_cols[3]:
+                st.markdown("**📅 Due**")
+            st.markdown(f"1. 📋 **Task:** :blue-badge[{first_priority}] ⏳ **Time:** :orange-badge[{data[top1]["time"]}] 🏔️ **Difficulty:** :red-badge[{data[top1]["difficulty"]}] 📅 **Due:** :primary-badge[{data[top1]["due_date"]}]")
+            st.markdown(f"2. 📋 **Task:** :blue-badge[{second_priority}] ⏳ **Time:** :orange-badge[{data[top2]["time"]}] 🏔️ **Difficulty:** :red-badge[{data[top2]["difficulty"]}] 📅 **Due:** :primary-badge[{data[top2]["due_date"]}]")
+            st.markdown(f"3. 📋 **Task:** :blue-badge[{third_priority}] ⏳ **Time:** :orange-badge[{data[top3]["time"]}] 🏔️ **Difficulty:** :red-badge[{data[top3]["difficulty"]}] 📅 **Due:** :primary-badge[{data[top3]["due_date"]}]")
 
 def algorithm():
     top1 = 0
