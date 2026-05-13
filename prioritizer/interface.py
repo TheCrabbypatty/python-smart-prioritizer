@@ -32,6 +32,8 @@ def button(name, time, difficulty, due_date):
                 writer.writeheader()
             writer.writerow({"name": name, "time": time, "difficulty": difficulty, "due_date": due_date})
         st.toast("Your event has been added", duration = 1, icon = "👈")
+
+
     
 def calculate_function():
     calc = st.button("Calculate Priority", width = "stretch", type = "primary", key = "calculate")
@@ -64,15 +66,25 @@ def calculate_function():
             header_cols = st.columns([3, 2, 2, 3])
             with header_cols[0]:
                 st.markdown("**📋 Task**")
+                st.markdown(f"1. :blue-badge[{first_priority}]")
+                st.markdown(f"2. :blue-badge[{second_priority}]")
+                st.markdown(f"3. :blue-badge[{third_priority}]")
             with header_cols[1]:
                 st.markdown("**⏳ Time**")
+                st.markdown(f":orange-badge[{data[top1]["time"]} minutes]")
+                st.markdown(f":orange-badge[{data[top2]["time"]} minutes]")
+                st.markdown(f":orange-badge[{data[top3]["time"]} minutes]")
             with header_cols[2]:
                 st.markdown("**🏔️ Difficulty**")
+                st.markdown(f":red-badge[{data[top1]["difficulty"]}]")
+                st.markdown(f":red-badge[{data[top2]["difficulty"]}]")
+                st.markdown(f":red-badge[{data[top3]["difficulty"]}]")
             with header_cols[3]:
                 st.markdown("**📅 Due**")
-            st.markdown(f"1. 📋 **Task:** :blue-badge[{first_priority}] ⏳ **Time:** :orange-badge[{data[top1]["time"]}] 🏔️ **Difficulty:** :red-badge[{data[top1]["difficulty"]}] 📅 **Due:** :primary-badge[{data[top1]["due_date"]}]")
-            st.markdown(f"2. 📋 **Task:** :blue-badge[{second_priority}] ⏳ **Time:** :orange-badge[{data[top2]["time"]}] 🏔️ **Difficulty:** :red-badge[{data[top2]["difficulty"]}] 📅 **Due:** :primary-badge[{data[top2]["due_date"]}]")
-            st.markdown(f"3. 📋 **Task:** :blue-badge[{third_priority}] ⏳ **Time:** :orange-badge[{data[top3]["time"]}] 🏔️ **Difficulty:** :red-badge[{data[top3]["difficulty"]}] 📅 **Due:** :primary-badge[{data[top3]["due_date"]}]")
+                st.markdown(f":primary-badge[{data[top1]["due_date"]}]")
+                st.markdown(f":primary-badge[{data[top2]["due_date"]}]")
+                st.markdown(f":primary-badge[{data[top3]["due_date"]}]")
+
 
 def algorithm():
     top1 = 0
@@ -95,6 +107,8 @@ def main():
     button(na,ti,di,da)
     st.space("small")
     with st.container(border = True):
+        st.subheader("Your tasks ⌚")
+        st.space("xxsmall")
         with open("memory.csv", "r") as file:
             fieldnames = ["name","time", "difficulty", "due_date"]
             reader = csv.DictReader(file, fieldnames = fieldnames)
