@@ -28,6 +28,10 @@ global toggle
 if "toggle" not in st.session_state:
     st.session_state.toggle = False
 
+global display_num
+if "display_num" not in st.session_state:
+    st.session_state.toggle = 0
+
 def l_interface():
     task = st.text_input("Task 📝", help = "The name of the task.")
     time = st.number_input("Estimated Time 🕞", min_value = 0, max_value = 1440, icon = "⌚", help = "The estimated time a task takes, in minutes.")
@@ -68,6 +72,9 @@ def calculate_function():
                     diff = d1.date() - today
                     priority_num = (st.session_state.difficulty_weight * int(row["difficulty"])) + (st.session_state.time_weight * int(row["time"])) - (st.session_state.due_weight * int(diff.days))
                     st.session_state.priority_list.append(priority_num)
+                i = 0
+                while i in range(st.session_state.display_num):
+                    ...
                 top1 = algorithm()
                 top2 = algorithm()
                 top3 = algorithm()
@@ -105,10 +112,12 @@ def calculate_function():
 def settings():
     with st.container(border = True):
         st.subheader("Settings ⚙️")
-        st.segmented_control("**Theme** 🎨",options = ["Dark", "Light", "Ocean", "Warmth", "Forest"], default = "Dark", required = True)
-        st.session_state.due_weight = st.session = st.slider("Due date weight ⏰", min_value = -7, max_value = 7, value = 3)
-        st.session_state.difficulty_weight = st.slider("Difficulty weight 😮‍💨", min_value = -7, max_value = 7, value = 3 )
-        st.session_state.time_weight = st.slider("TIme weight ⏲️", min_value = -7, max_value = 7, value = 3)
+        st.segmented_control("**Theme** 🎨",options = ["Dark", "Light", "Ocean", "Warmth", "Forest", "Galaxy"], default = "Dark", required = True)
+        st.session_state.due_weight = st.session = st.slider("Due date weight ⏰", min_value = -7, max_value = 7, value = 3, help = "The weight that you wish to put on the due date, the larger the value, the more impactful it is towards the priority value.")
+        st.session_state.difficulty_weight = st.slider("Difficulty weight 😮‍💨", min_value = -7, max_value = 7, value = 3, help = "The weight that you wish to put on the difficulty, the larger the value, the more impactful it is towards the priority value.")
+        st.session_state.time_weight = st.slider("Time weight ⏲️", min_value = -7, max_value = 7, value = 3, help = "The weight that you wish to put on the estimated time, the larger the value, the more impactful it is towards the priority value.")
+        st.session_state.display_num = st.number_input("Priorities displayed 📌", min_value = 0, max_value = len(st.session_state.priority_list), value = len(st.session_state.priority_list), help = "The number of priorities displayed in the ranking of top priorities.")
+        st.space("xxsmall")
 
 
 
@@ -122,6 +131,25 @@ def algorithm():
     st.session_state.priority_list[top1] = float("-inf")
     return top1
 
+def task_box():
+    with st.container(border = True):
+        col1, col2 = st.columns([10,1])
+        with col1:
+            st.subheader("Your tasks ⌚")
+        with col2:
+            st.button("🗑️", type = "primary")
+        st.space("xxsmall")
+        with open("memory.csv", "r") as file:
+            fieldnames = ["name","time", "difficulty", "due_date"]
+            reader = csv.DictReader(file, fieldnames = fieldnames)
+            for row in reader:
+                col1, col2, col3, col4 = st.columns([1.5, 1.5, 1.5, 1.5])
+                col1.markdown(f"📋 **Task:** :blue-badge[{row['name']}]")
+                col2.markdown(f"⏳ **Time:** :orange-badge[{row['time']} minutes]")
+                col3.markdown(f"🏔️ **Difficulty:** :red-badge[{row['difficulty']}]")
+                col4.markdown(f"📅 **Due:** :primary-badge[{row['due_date']}]")
+
+
 def main():
     st.title("Smart Prioritizer 🧠")
     col1, col2 = st.columns(2)
@@ -132,18 +160,7 @@ def main():
     st.space("xxsmall")
     button(na,ti,di,da)
     st.space("small")
-    with st.container(border = True):
-        st.subheader("Your tasks ⌚")
-        st.button("", icon = "🗑️")
-        with open("memory.csv", "r") as file:
-            fieldnames = ["name","time", "difficulty", "due_date"]
-            reader = csv.DictReader(file, fieldnames = fieldnames)
-            for row in reader:
-                col1, col2, col3, col4 = st.columns([1.5, 1.5, 1.5, 1.5])
-                col1.markdown(f"📋 **Task:** :blue-badge[{row['name']}]")
-                col2.markdown(f"⏳ **Time:** :orange-badge[{row['time']} minutes]")
-                col3.markdown(f"🏔️ **Difficulty:** :red-badge[{row['difficulty']}]")
-                col4.markdown(f"📅 **Due:** :primary-badge[{row['due_date']}]")
+    task_box()
     st.space("xxsmall")
     calculate_function()
     st.space("xxsmall")
