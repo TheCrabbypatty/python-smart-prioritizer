@@ -4,6 +4,10 @@ import time
 from datetime import date
 from datetime import datetime
 
+global task_num
+if "task_num" not in st.session_state:
+    st.session_state.task_list = 0
+
 global task_list
 if "task_list" not in st.session_state:
     st.session_state.task_list = []
@@ -11,6 +15,10 @@ if "task_list" not in st.session_state:
 global priority_list
 if "priority_list" not in st.session_state:
     st.session_state.priority_list = []
+
+global ranking_list
+if "ranking_list" not in st.session_state:
+    st.session_state.ranking_list = []
 
 global due_weight
 if "due_weight" not in st.session_state:
@@ -32,6 +40,12 @@ global display_num
 if "display_num" not in st.session_state:
     st.session_state.toggle = 0
 
+def setup():
+    with open("memory.csv", "r") as file:
+        reader = csv.reader(file)
+        row_count = sum(1 for row in reader)
+        st.session_state.task_num = row_count
+
 def l_interface():
     task = st.text_input("Task 📝", help = "The name of the task.")
     time = st.number_input("Estimated Time 🕞", min_value = 0, max_value = 1440, icon = "⌚", help = "The estimated time a task takes, in minutes.")
@@ -41,6 +55,7 @@ def r_interface():
     difficulty = st.slider("Difficulty 🏔️", min_value = 0, max_value = 5, help = "The difficulty of the task.")
     due_date = st.date_input("Due date 🗓️", format = "MM/DD/YYYY", help = "The due date of a task.")
     return difficulty, due_date
+
 
 def button(name, time, difficulty, due_date):
     add_event = st.button("Add Event", width = "stretch", key = "add")
@@ -72,42 +87,35 @@ def calculate_function():
                     diff = d1.date() - today
                     priority_num = (st.session_state.difficulty_weight * int(row["difficulty"])) + (st.session_state.time_weight * int(row["time"])) - (st.session_state.due_weight * int(diff.days))
                     st.session_state.priority_list.append(priority_num)
-                i = 0
-                while i in range(st.session_state.display_num):
-                    ...
-                top1 = algorithm()
-                top2 = algorithm()
-                top3 = algorithm()
+                algorithm(st.session_state.display_num)
             with open("memory.csv", "r") as file:
                 fieldnames = ["name", "time", "difficulty", "due_date"]
                 reader = csv.DictReader(file, fieldnames = fieldnames)
                 data = list(reader)
-                first_priority = data[top1]["name"]
-                second_priority = data[top2]["name"]
-                third_priority = data[top3]["name"]
             st.subheader("**Top Priorities for Today** 🏆")
             st.space("xxsmall")
             header_cols = st.columns([3, 2, 2, 3])
             with header_cols[0]:
                 st.markdown("**📋 Task**")
-                st.markdown(f"1. :blue-badge[{first_priority}]")
-                st.markdown(f"2. :blue-badge[{second_priority}]")
-                st.markdown(f"3. :blue-badge[{third_priority}]")
+                i = 0
+                for i in range(st.session_state.display_num):
+                    st.markdown(f"{i+1}. :blue-badge[{data[st.session_state.ranking_list[i]]["name"]}]")
             with header_cols[1]:
                 st.markdown("**⏳ Time**")
-                st.markdown(f":orange-badge[{data[top1]["time"]} minutes]")
-                st.markdown(f":orange-badge[{data[top2]["time"]} minutes]")
-                st.markdown(f":orange-badge[{data[top3]["time"]} minutes]")
+                i = 0
+                for i in range(st.session_state.display_num):
+                    st.markdown(f":orange-badge[{data[st.session_state.ranking_list[i]]["time"]} minutes]")
             with header_cols[2]:
                 st.markdown("**🏔️ Difficulty**")
-                st.markdown(f":red-badge[{data[top1]["difficulty"]}]")
-                st.markdown(f":red-badge[{data[top2]["difficulty"]}]")
-                st.markdown(f":red-badge[{data[top3]["difficulty"]}]")
+                i = 0
+                for i in range(st.session_state.display_num):
+                    st.markdown(f":red-badge[{data[st.session_state.ranking_list[i]]["difficulty"]}]")
             with header_cols[3]:
                 st.markdown("**📅 Due**")
-                st.markdown(f":primary-badge[{data[top1]["due_date"]}]")
-                st.markdown(f":primary-badge[{data[top2]["due_date"]}]")
-                st.markdown(f":primary-badge[{data[top3]["due_date"]}]")
+                i = 0
+                for i in range(st.session_state.display_num):
+                    st.markdown(f":primary-badge[{data[st.session_state.ranking_list[i]]["due_date"]}]")
+
 
 def settings():
     with st.container(border = True):
@@ -116,20 +124,20 @@ def settings():
         st.session_state.due_weight = st.session = st.slider("Due date weight ⏰", min_value = -7, max_value = 7, value = 3, help = "The weight that you wish to put on the due date, the larger the value, the more impactful it is towards the priority value.")
         st.session_state.difficulty_weight = st.slider("Difficulty weight 😮‍💨", min_value = -7, max_value = 7, value = 3, help = "The weight that you wish to put on the difficulty, the larger the value, the more impactful it is towards the priority value.")
         st.session_state.time_weight = st.slider("Time weight ⏲️", min_value = -7, max_value = 7, value = 3, help = "The weight that you wish to put on the estimated time, the larger the value, the more impactful it is towards the priority value.")
-        st.session_state.display_num = st.number_input("Priorities displayed 📌", min_value = 0, max_value = len(st.session_state.priority_list), value = len(st.session_state.priority_list), help = "The number of priorities displayed in the ranking of top priorities.")
+        st.session_state.display_num = st.number_input("Priorities displayed 📌", min_value = 0, max_value = st.session_state.task_num, value = st.session_state.task_num, help = "The number of priorities displayed in the ranking of top priorities.")
         st.space("xxsmall")
 
-
-
-def algorithm():
-    top1 = 0
-    max = st.session_state.priority_list[0]
-    for i in range(len(st.session_state.priority_list)):
-        if st.session_state.priority_list[i] > max:
-            max = st.session_state.priority_list[i]
-            top1 = i    
-    st.session_state.priority_list[top1] = float("-inf")
-    return top1
+def algorithm(n):
+    i = 0
+    for i in range(n):
+        top1 = 0
+        max = st.session_state.priority_list[0]
+        for i in range(len(st.session_state.priority_list)):
+            if st.session_state.priority_list[i] > max:
+                max = st.session_state.priority_list[i]
+                top1 = i    
+        st.session_state.priority_list[top1] = float("-inf")
+        st.session_state.ranking_list.append(top1)
 
 def task_box():
     with st.container(border = True):
@@ -151,6 +159,7 @@ def task_box():
 
 
 def main():
+    setup()
     st.title("Smart Prioritizer 🧠")
     col1, col2 = st.columns(2)
     with col1:
