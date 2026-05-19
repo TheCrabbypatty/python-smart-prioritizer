@@ -94,23 +94,28 @@ def calculate_function():
                 data = list(reader)
             st.subheader("**Top Priorities for Today** 🏆")
             st.space("xxsmall")
-            header_cols = st.columns([3, 2, 2, 3])
+            header_cols = st.columns([0.75, 3, 1.75, 1.5, 3])
             with header_cols[0]:
+                st.markdown("**🏆**")
+                i = 0
+                for i in range(st.session_state.display_num):
+                    st.badge(f"{i+1}.", color = "green")
+            with header_cols[1]:
                 st.markdown("**📋 Task**")
                 i = 0
                 for i in range(st.session_state.display_num):
-                    st.markdown(f"{i+1}. :blue-badge[{data[st.session_state.ranking_list[i]]["name"]}]")
-            with header_cols[1]:
+                    st.markdown(f":blue-badge[{data[st.session_state.ranking_list[i]]["name"]}]")
+            with header_cols[2]:
                 st.markdown("**⏳ Time**")
                 i = 0
                 for i in range(st.session_state.display_num):
                     st.markdown(f":orange-badge[{data[st.session_state.ranking_list[i]]["time"]} minutes]")
-            with header_cols[2]:
+            with header_cols[3]:
                 st.markdown("**🏔️ Difficulty**")
                 i = 0
                 for i in range(st.session_state.display_num):
                     st.markdown(f":red-badge[{data[st.session_state.ranking_list[i]]["difficulty"]}]")
-            with header_cols[3]:
+            with header_cols[4]:
                 st.markdown("**📅 Due**")
                 i = 0
                 for i in range(st.session_state.display_num):
