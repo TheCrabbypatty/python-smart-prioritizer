@@ -87,6 +87,7 @@ def calculate_function():
                     diff = d1.date() - today
                     priority_num = (st.session_state.difficulty_weight * int(row["difficulty"])) + (st.session_state.time_weight * int(row["time"])) - (st.session_state.due_weight * int(diff.days))
                     st.session_state.priority_list.append(priority_num)
+                st.session_state.ranking_list = []
                 algorithm(st.session_state.display_num)
             with open("memory.csv", "r") as file:
                 fieldnames = ["name", "time", "difficulty", "due_date"]
@@ -144,13 +145,17 @@ def algorithm(n):
         st.session_state.priority_list[top1] = float("-inf")
         st.session_state.ranking_list.append(top1)
 
+def trash():
+    with open("memory.csv", "w") as file:
+        pass
+        
 def task_box():
     with st.container(border = True):
         col1, col2 = st.columns([10,1])
         with col1:
             st.subheader("Your tasks ⌚")
         with col2:
-            st.button("🗑️", type = "primary")
+            st.button("🗑️", type = "primary", on_click = trash)
         st.space("xxsmall")
         with open("memory.csv", "r") as file:
             fieldnames = ["name","time", "difficulty", "due_date"]
