@@ -52,3 +52,10 @@ The settings page controls the weights, and the number of tasks that are display
 
 ### License
 This project is licensed under the MIT lisence see the LICENSE file for more details.
+
+
+## Last Updated
+
+<!-- TIMESTAMP_START -->
+_Last updated: 2026-08-30 17:17 UTC_
+<!-- TIMESTAMP_END -->
